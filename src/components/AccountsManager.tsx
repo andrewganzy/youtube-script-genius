@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -7,18 +7,40 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
-import { Separator } from "@/components/ui/separator";
 import { Pencil, Trash } from "lucide-react";
+import { WordPressAccount } from "@/types/wordpress";
+
+const STORAGE_KEY = "wordpress_accounts";
 
 const AccountsManager = ({ accounts, setAccounts }) => {
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<Omit<WordPressAccount, "id">>({
     siteUrl: "",
     username: "",
     password: "",
     seoKeywords: ""
   });
-  const [editingId, setEditingId] = useState(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Load accounts from localStorage on component mount
+  useEffect(() => {
+    const savedAccounts = localStorage.getItem(STORAGE_KEY);
+    if (savedAccounts && savedAccounts !== "undefined" && savedAccounts !== "null") {
+      try {
+        const parsedAccounts = JSON.parse(savedAccounts);
+        setAccounts(parsedAccounts);
+      } catch (error) {
+        console.error("Failed to parse accounts from localStorage:", error);
+      }
+    }
+  }, [setAccounts]);
+
+  // Save accounts to localStorage whenever they change
+  useEffect(() => {
+    if (accounts) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(accounts));
+    }
+  }, [accounts]);
 
   const resetForm = () => {
     setForm({

@@ -1,5 +1,4 @@
-
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -14,11 +13,11 @@ import { extractVideoId, buildEmbedUrl } from "@/lib/youtube";
 import AccountsManager from "@/components/AccountsManager";
 import PublishSettings from "@/components/PublishSettings";
 import ExistingPosts from "@/components/ExistingPosts";
-import { PublishSettings as PublishSettingsType, WordPressPost } from "@/types/wordpress";
+import { PublishSettings as PublishSettingsType, WordPressPost, WordPressAccount } from "@/types/wordpress";
 
 const contentTypes = [
   "sales copy",
-  "blog post",
+  "blog post", 
   "code mode",
   "actionable guide",
   "facebook post",
@@ -34,7 +33,7 @@ const Index = () => {
   const [selectedAccount, setSelectedAccount] = useState("");
   const [seoEnabled, setSeoEnabled] = useState(false);
   const [activeTab, setActiveTab] = useState("editor");
-  const [accounts, setAccounts] = useState([]);
+  const [accounts, setAccounts] = useState<WordPressAccount[]>([]);
   const [videoId, setVideoId] = useState<string | null>(null);
   const [publishSettings, setPublishSettings] = useState<PublishSettingsType>({
     title: "",
@@ -43,6 +42,15 @@ const Index = () => {
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const editorRef = useRef<any>(null);
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Fetch accounts from backend API
+    // In a real app, you would call your backend API to fetch accounts
+    setAccounts([
+      { id: "1", siteUrl: "https://example.com" },
+      { id: "2", siteUrl: "https://example.org" }
+    ]);
+  }, []);
 
   const fetchTranscript = async () => {
     if (!url) {
