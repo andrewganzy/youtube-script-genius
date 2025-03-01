@@ -2,9 +2,18 @@
 import { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { Card } from "@/components/ui/card";
 
-const Editor = forwardRef(({ content, onChange }, ref) => {
+interface EditorProps {
+  content: string;
+  onChange?: (content: string) => void;
+}
+
+interface EditorRef {
+  getContent: () => string;
+  setContent: (content: string) => void;
+}
+
+const Editor = forwardRef<EditorRef, EditorProps>(({ content, onChange }, ref) => {
   const [value, setValue] = useState("");
   
   useEffect(() => {
@@ -16,7 +25,7 @@ const Editor = forwardRef(({ content, onChange }, ref) => {
     setContent: (newContent) => setValue(newContent)
   }));
   
-  const handleChange = (newContent) => {
+  const handleChange = (newContent: string) => {
     setValue(newContent);
     if (onChange) onChange(newContent);
   };
@@ -48,7 +57,7 @@ const Editor = forwardRef(({ content, onChange }, ref) => {
         formats={formats}
         className="min-h-[300px]"
       />
-      <style jsx global>{`
+      <style jsx>{`
         .ql-editor {
           min-height: 300px;
           font-size: 16px;

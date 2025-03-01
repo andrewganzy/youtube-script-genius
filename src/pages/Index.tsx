@@ -7,12 +7,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { AlertCircle, CheckCircle } from "lucide-react";
+import { AlertCircle, CheckCircle, Youtube, Play, MessageSquare } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import Editor from "@/components/Editor";
-import { extractVideoId } from "@/lib/youtube";
+import { extractVideoId, buildEmbedUrl } from "@/lib/youtube";
 import AccountsManager from "@/components/AccountsManager";
 
 const contentTypes = [
@@ -34,7 +33,8 @@ const Index = () => {
   const [seoEnabled, setSeoEnabled] = useState(false);
   const [activeTab, setActiveTab] = useState("editor");
   const [accounts, setAccounts] = useState([]);
-  const editorRef = useRef(null);
+  const [videoId, setVideoId] = useState<string | null>(null);
+  const editorRef = useRef<any>(null);
   const { toast } = useToast();
 
   const fetchTranscript = async () => {
@@ -47,8 +47,8 @@ const Index = () => {
       return;
     }
 
-    const videoId = extractVideoId(url);
-    if (!videoId) {
+    const extractedVideoId = extractVideoId(url);
+    if (!extractedVideoId) {
       toast({
         title: "Error",
         description: "Invalid YouTube URL",
@@ -57,12 +57,13 @@ const Index = () => {
       return;
     }
 
+    setVideoId(extractedVideoId);
     setLoading(true);
     try {
       // Mock API call for demo purposes
       // In a real app, you would call your backend API
       setTimeout(() => {
-        const mockTranscript = "This is a mock transcript for the video with ID: " + videoId + 
+        const mockTranscript = "This is a mock transcript for the video with ID: " + extractedVideoId + 
           ". In a real application, this would be fetched from the YouTube API or using a transcript extraction library. " +
           "The transcript would contain all the spoken words from the video, which could then be processed by AI to generate different types of content.";
         
@@ -192,11 +193,29 @@ const Index = () => {
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="flex flex-col items-center space-y-8">
         <div className="text-center space-y-4 w-full">
-          <h1 className="text-4xl font-bold tracking-tight">YouTube Script Genius</h1>
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <div className="rounded-full bg-red-600 p-3 text-white">
+              <Youtube size={32} />
+            </div>
+            <h1 className="text-4xl font-bold tracking-tight">Content Forge by CCwithAI</h1>
+          </div>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Transform YouTube transcripts into various content types using AI and publish directly to WordPress
           </p>
         </div>
+
+        {videoId && (
+          <div className="w-full max-w-2xl aspect-video rounded-lg overflow-hidden shadow-lg">
+            <iframe 
+              width="100%" 
+              height="100%" 
+              src={buildEmbedUrl(videoId)}
+              title="YouTube video player" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowFullScreen>
+            </iframe>
+          </div>
+        )}
 
         <Tabs 
           defaultValue="editor" 
@@ -212,7 +231,10 @@ const Index = () => {
           <TabsContent value="editor" className="w-full mt-6">
             <Card className="w-full">
               <CardHeader>
-                <CardTitle>YouTube Transcript</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Play className="text-red-600" size={24} />
+                  YouTube Transcript
+                </CardTitle>
                 <CardDescription>
                   Enter a YouTube URL to fetch the transcript
                 </CardDescription>
@@ -228,8 +250,8 @@ const Index = () => {
                     />
                     <Button 
                       onClick={fetchTranscript} 
-                      disabled={loading || !url}
-                      className="whitespace-nowrap"
+                      disabled={loading}
+                      className="whitespace-nowrap bg-red-600 hover:bg-red-700"
                     >
                       {loading ? "Fetching..." : "Fetch Transcript"}
                     </Button>
@@ -264,7 +286,7 @@ const Index = () => {
                     <Button 
                       onClick={refactorContent} 
                       disabled={loading || !transcript}
-                      className="col-span-1"
+                      className="col-span-1 bg-purple-600 hover:bg-purple-700"
                     >
                       {loading ? "Processing..." : "Refactor Content"}
                     </Button>
@@ -276,7 +298,10 @@ const Index = () => {
             <div className="mt-8">
               <Card className="w-full">
                 <CardHeader>
-                  <CardTitle>Content Editor</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageSquare className="text-purple-600" size={24} />
+                    Content Editor
+                  </CardTitle>
                   <CardDescription>
                     Edit your content before sending to WordPress
                   </CardDescription>
@@ -307,7 +332,7 @@ const Index = () => {
                   <Button 
                     onClick={sendToWordPress} 
                     disabled={loading || !content || !selectedAccount}
-                    className="w-full sm:w-auto"
+                    className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
                   >
                     {loading ? "Sending..." : "Send to WordPress"}
                   </Button>
