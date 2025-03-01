@@ -6,14 +6,17 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, CheckCircle, Youtube, Play, MessageSquare, Calendar, Settings } from "lucide-react";
+import { AlertCircle, CheckCircle, Youtube, Play, MessageSquare, Calendar, Settings, Image as ImageIcon, FileText, FolderImage } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { Link } from "react-router-dom";
 import Editor from "@/components/Editor";
 import { extractVideoId, buildEmbedUrl } from "@/lib/youtube";
 import AccountsManager from "@/components/AccountsManager";
 import PublishSettings from "@/components/PublishSettings";
 import ExistingPosts from "@/components/ExistingPosts";
-import { PublishSettings as PublishSettingsType, WordPressPost, WordPressAccount } from "@/types/wordpress";
+import TemplateManager from "@/components/TemplateManager";
+import MediaManager from "@/components/MediaManager";
+import { PublishSettings as PublishSettingsType, WordPressPost, WordPressAccount, WordPressMedia } from "@/types/wordpress";
 
 const contentTypes = [
   "sales copy",
@@ -40,15 +43,15 @@ const Index = () => {
     status: "draft",
   });
   const [editingPostId, setEditingPostId] = useState<string | null>(null);
+  const [showFeaturedImageSelector, setShowFeaturedImageSelector] = useState(false);
+  const [featuredImage, setFeaturedImage] = useState<WordPressMedia | null>(null);
   const editorRef = useRef<any>(null);
   const { toast } = useToast();
 
   useEffect(() => {
-    // Fetch accounts from backend API
-    // In a real app, you would call your backend API to fetch accounts
     setAccounts([
-      { id: "1", siteUrl: "https://example.com" },
-      { id: "2", siteUrl: "https://example.org" }
+      { id: "1", siteUrl: "https://example.com", username: "user1", password: "pass1" },
+      { id: "2", siteUrl: "https://example.org", username: "user2", password: "pass2" }
     ]);
   }, []);
 
@@ -75,8 +78,6 @@ const Index = () => {
     setVideoId(extractedVideoId);
     setLoading(true);
     try {
-      // Mock API call for demo purposes
-      // In a real app, you would call your backend API
       setTimeout(() => {
         const mockTranscript = "This is a mock transcript for the video with ID: " + extractedVideoId + 
           ". In a real application, this would be fetched from the YouTube API or using a transcript extraction library. " +
@@ -117,7 +118,6 @@ const Index = () => {
 
     setLoading(true);
     try {
-      // Mock AI processing
       setTimeout(() => {
         const account = accounts.find(a => a.id === selectedAccount);
         const seoKeywords = seoEnabled && account ? account.seoKeywords : '';
@@ -199,14 +199,11 @@ const Index = () => {
 
     setLoading(true);
     try {
-      // Step 1: Mock AI conversion to Gutenberg blocks
       console.log("Converting to Gutenberg blocks...");
-      // In a real app, this would send the content to an AI model to convert to Gutenberg blocks
       const blockContent = `<!-- wp:paragraph -->
 <p>${content.replace(/\n/g, "</p>\n<!-- wp:paragraph -->\n<p>")}</p>
 <!-- /wp:paragraph -->`;
 
-      // Step 2: Mock WordPress API call
       console.log("Sending to WordPress...");
       console.log("Post settings:", publishSettings);
       
@@ -219,7 +216,6 @@ const Index = () => {
             : `Post ${publishSettings.status === "future" ? "scheduled" : "sent to WordPress"} successfully`,
         });
         
-        // Reset after successful publish
         if (!editingPostId) {
           setContent("");
           setPublishSettings({
@@ -267,6 +263,32 @@ const Index = () => {
     setEditingPostId(null);
   };
 
+  const handleApplyTemplate = (templateContent: string, templateTitle: string) => {
+    setContent(templateContent);
+    if (editorRef.current) {
+      editorRef.current.setContent(templateContent);
+    }
+    
+    setPublishSettings({
+      ...publishSettings,
+      title: templateTitle
+    });
+    
+    toast({
+      title: "Template Applied",
+      description: `The template "${templateTitle}" has been applied`,
+    });
+  };
+
+  const handleSelectFeaturedImage = (image: WordPressMedia) => {
+    setFeaturedImage(image);
+    setPublishSettings({
+      ...publishSettings,
+      featuredImageId: image.id
+    });
+    setShowFeaturedImageSelector(false);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
       <div className="flex flex-col items-center space-y-8">
@@ -280,6 +302,14 @@ const Index = () => {
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Transform YouTube transcripts into various content types using AI and publish directly to WordPress
           </p>
+          <div className="flex justify-center mt-4 gap-4">
+            <Link to="/media">
+              <Button variant="outline" className="gap-2">
+                <FolderImage className="h-4 w-4" />
+                Media Library
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {videoId && (
@@ -301,8 +331,9 @@ const Index = () => {
           value={activeTab} 
           onValueChange={setActiveTab}
         >
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-3">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-4">
             <TabsTrigger value="editor">Content Editor</TabsTrigger>
+            <TabsTrigger value="templates">Templates</TabsTrigger>
             <TabsTrigger value="existing">Existing Posts</TabsTrigger>
             <TabsTrigger value="accounts">WordPress Accounts</TabsTrigger>
           </TabsList>
@@ -386,19 +417,86 @@ const Index = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Editor 
-                    content={content} 
-                    onChange={setContent} 
-                    ref={editorRef}
-                  />
-                  
-                  <div className="mt-6">
-                    <PublishSettings
-                      initialSettings={publishSettings}
-                      onSettingsChange={setPublishSettings}
-                      postId={editingPostId || undefined}
-                    />
-                  </div>
+                  {showFeaturedImageSelector ? (
+                    <div className="mb-6">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-medium">Select Featured Image</h3>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          onClick={() => setShowFeaturedImageSelector(false)}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                      <MediaManager 
+                        accounts={accounts}
+                        selectedAccount={selectedAccount}
+                        onSelectImage={handleSelectFeaturedImage}
+                        selectionMode={true}
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="mb-4">
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-2">
+                          <div className="flex items-center gap-2">
+                            <ImageIcon className="h-5 w-5 text-muted-foreground" />
+                            <h3 className="text-base font-medium">Featured Image</h3>
+                          </div>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => setShowFeaturedImageSelector(true)}
+                            className="w-full sm:w-auto"
+                          >
+                            {featuredImage ? "Change Featured Image" : "Add Featured Image"}
+                          </Button>
+                        </div>
+                        
+                        {featuredImage && (
+                          <div className="border rounded-md p-2 flex items-center gap-4">
+                            <img 
+                              src={featuredImage.url} 
+                              alt={featuredImage.alt || featuredImage.title} 
+                              className="w-16 h-16 object-cover rounded"
+                            />
+                            <div className="flex-1">
+                              <p className="font-medium text-sm">{featuredImage.title}</p>
+                              <p className="text-xs text-muted-foreground">{featuredImage.alt}</p>
+                            </div>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              onClick={() => {
+                                setFeaturedImage(null);
+                                setPublishSettings({
+                                  ...publishSettings,
+                                  featuredImageId: undefined
+                                });
+                              }}
+                            >
+                              <AlertCircle className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <Editor 
+                        content={content} 
+                        onChange={setContent} 
+                        ref={editorRef}
+                      />
+                      
+                      <div className="mt-6">
+                        <PublishSettings
+                          initialSettings={publishSettings}
+                          onSettingsChange={setPublishSettings}
+                          postId={editingPostId || undefined}
+                        />
+                      </div>
+                    </>
+                  )}
                 </CardContent>
                 <CardFooter className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0">
                   <div className="space-y-2 w-full sm:w-auto">
@@ -438,6 +536,29 @@ const Index = () => {
                 </CardFooter>
               </Card>
             </div>
+          </TabsContent>
+          
+          <TabsContent value="templates" className="w-full mt-6">
+            <Card className="w-full">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="text-blue-600" size={24} />
+                  Content Templates
+                </CardTitle>
+                <CardDescription>
+                  Save and reuse content templates across your WordPress sites
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <TemplateManager 
+                  content={content}
+                  publishSettings={publishSettings}
+                  selectedAccount={selectedAccount}
+                  accounts={accounts}
+                  onApplyTemplate={handleApplyTemplate}
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
           
           <TabsContent value="existing" className="w-full mt-6">

@@ -27,4 +27,24 @@ export interface PublishSettings {
   scheduledDate?: string; // ISO date string for scheduled posts
   categoryIds?: string[];
   tagIds?: string[];
+  featuredImageId?: string;
+}
+
+export interface WordPressTemplate {
+  id: string;
+  title: string;
+  content: string;
+  accountId: string;
+  createdAt: string;
+  description?: string;
+}
+
+export interface WordPressMedia {
+  id: string;
+  title: string;
+  url: string;
+  alt?: string;
+  date: string;
+  type: string;
+  accountId: string;
 }
