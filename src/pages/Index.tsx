@@ -7,12 +7,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { AlertCircle, CheckCircle, Youtube, Play, MessageSquare } from "lucide-react";
+import { AlertCircle, CheckCircle, Youtube, Play, MessageSquare, Calendar, Settings } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import Editor from "@/components/Editor";
 import { extractVideoId, buildEmbedUrl } from "@/lib/youtube";
 import AccountsManager from "@/components/AccountsManager";
+import PublishSettings from "@/components/PublishSettings";
+import ExistingPosts from "@/components/ExistingPosts";
+import { PublishSettings as PublishSettingsType, WordPressPost } from "@/types/wordpress";
 
 const contentTypes = [
   "sales copy",
@@ -34,6 +36,11 @@ const Index = () => {
   const [activeTab, setActiveTab] = useState("editor");
   const [accounts, setAccounts] = useState([]);
   const [videoId, setVideoId] = useState<string | null>(null);
+  const [publishSettings, setPublishSettings] = useState<PublishSettingsType>({
+    title: "",
+    status: "draft",
+  });
+  const [editingPostId, setEditingPostId] = useState<string | null>(null);
   const editorRef = useRef<any>(null);
   const { toast } = useToast();
 
@@ -69,6 +76,10 @@ const Index = () => {
         
         setTranscript(mockTranscript);
         setContent(mockTranscript);
+        setPublishSettings({
+          ...publishSettings,
+          title: `Content from YouTube video ${extractedVideoId}`
+        });
         setLoading(false);
         
         toast({
@@ -169,15 +180,46 @@ const Index = () => {
       return;
     }
 
+    if (!publishSettings.title) {
+      toast({
+        title: "Error",
+        description: "Please enter a post title",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
-      // Mock WordPress API call
+      // Step 1: Mock AI conversion to Gutenberg blocks
+      console.log("Converting to Gutenberg blocks...");
+      // In a real app, this would send the content to an AI model to convert to Gutenberg blocks
+      const blockContent = `<!-- wp:paragraph -->
+<p>${content.replace(/\n/g, "</p>\n<!-- wp:paragraph -->\n<p>")}</p>
+<!-- /wp:paragraph -->`;
+
+      // Step 2: Mock WordPress API call
+      console.log("Sending to WordPress...");
+      console.log("Post settings:", publishSettings);
+      
       setTimeout(() => {
         setLoading(false);
         toast({
           title: "Success",
-          description: "Content sent to WordPress successfully",
+          description: editingPostId 
+            ? "Post updated successfully" 
+            : `Post ${publishSettings.status === "future" ? "scheduled" : "sent to WordPress"} successfully`,
         });
+        
+        // Reset after successful publish
+        if (!editingPostId) {
+          setContent("");
+          setPublishSettings({
+            title: "",
+            status: "draft"
+          });
+          setEditingPostId(null);
+        }
       }, 2000);
     } catch (error) {
       setLoading(false);
@@ -187,6 +229,34 @@ const Index = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleEditPost = (post: WordPressPost) => {
+    setActiveTab("editor");
+    setContent(post.content);
+    if (editorRef.current) {
+      editorRef.current.setContent(post.content);
+    }
+    setPublishSettings({
+      title: post.title,
+      status: post.status,
+      scheduledDate: post.status === "future" ? post.date : undefined
+    });
+    setEditingPostId(post.id);
+    
+    toast({
+      title: "Post loaded",
+      description: `Editing post: ${post.title}`,
+    });
+  };
+
+  const cancelEditing = () => {
+    setContent("");
+    setPublishSettings({
+      title: "",
+      status: "draft"
+    });
+    setEditingPostId(null);
   };
 
   return (
@@ -223,8 +293,9 @@ const Index = () => {
           value={activeTab} 
           onValueChange={setActiveTab}
         >
-          <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
+          <TabsList className="grid w-full max-w-md mx-auto grid-cols-3">
             <TabsTrigger value="editor">Content Editor</TabsTrigger>
+            <TabsTrigger value="existing">Existing Posts</TabsTrigger>
             <TabsTrigger value="accounts">WordPress Accounts</TabsTrigger>
           </TabsList>
           
@@ -312,6 +383,14 @@ const Index = () => {
                     onChange={setContent} 
                     ref={editorRef}
                   />
+                  
+                  <div className="mt-6">
+                    <PublishSettings
+                      initialSettings={publishSettings}
+                      onSettingsChange={setPublishSettings}
+                      postId={editingPostId || undefined}
+                    />
+                  </div>
                 </CardContent>
                 <CardFooter className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0">
                   <div className="space-y-2 w-full sm:w-auto">
@@ -329,16 +408,35 @@ const Index = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <Button 
-                    onClick={sendToWordPress} 
-                    disabled={loading || !content || !selectedAccount}
-                    className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
-                  >
-                    {loading ? "Sending..." : "Send to WordPress"}
-                  </Button>
+                  <div className="flex gap-3 w-full sm:w-auto">
+                    {editingPostId && (
+                      <Button 
+                        onClick={cancelEditing} 
+                        variant="outline"
+                        className="w-full sm:w-auto"
+                      >
+                        Cancel Editing
+                      </Button>
+                    )}
+                    <Button 
+                      onClick={sendToWordPress} 
+                      disabled={loading || !content || !selectedAccount || !publishSettings.title}
+                      className="w-full sm:w-auto bg-green-600 hover:bg-green-700"
+                    >
+                      {loading ? "Sending..." : editingPostId ? "Update Post" : 
+                        publishSettings.status === "future" ? "Schedule Post" : "Send to WordPress"}
+                    </Button>
+                  </div>
                 </CardFooter>
               </Card>
             </div>
+          </TabsContent>
+          
+          <TabsContent value="existing" className="w-full mt-6">
+            <ExistingPosts 
+              accounts={accounts}
+              onEditPost={handleEditPost}
+            />
           </TabsContent>
           
           <TabsContent value="accounts" className="w-full mt-6">

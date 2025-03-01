@@ -57,7 +57,8 @@ const Editor = forwardRef<EditorRef, EditorProps>(({ content, onChange }, ref) =
         formats={formats}
         className="min-h-[300px]"
       />
-      <style jsx>{`
+      <style>
+        {`
         .ql-editor {
           min-height: 300px;
           font-size: 16px;
@@ -74,7 +75,8 @@ const Editor = forwardRef<EditorRef, EditorProps>(({ content, onChange }, ref) =
           border-top-right-radius: 0.5rem;
           border: 1px solid hsl(var(--border));
         }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 });
