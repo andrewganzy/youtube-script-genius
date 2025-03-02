@@ -28,8 +28,8 @@ const Media = ({ accounts = [] }: MediaPageProps) => {
           </p>
         </div>
 
-        <Card className="w-full">
-          <CardHeader>
+        <Card className="w-full shadow-sm border-slate-200">
+          <CardHeader className="bg-slate-50 border-b">
             <CardTitle className="flex items-center gap-2">
               <Images className="text-purple-600" size={24} />
               Media Library
@@ -38,7 +38,7 @@ const Media = ({ accounts = [] }: MediaPageProps) => {
               Browse, search, and manage your WordPress media files
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-6">
             <Tabs defaultValue="all" className="w-full">
               <TabsList className="grid w-full max-w-md mx-auto grid-cols-2">
                 <TabsTrigger value="all">All Media</TabsTrigger>

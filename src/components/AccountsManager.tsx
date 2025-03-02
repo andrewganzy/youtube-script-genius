@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/components/ui/use-toast";
-import { Pencil, Trash } from "lucide-react";
+import { Pencil, Trash, UserCircle2 } from "lucide-react";
 import { WordPressAccount } from "@/types/wordpress";
 
 const STORAGE_KEY = "wordpress_accounts";
@@ -115,14 +115,17 @@ const AccountsManager = ({ accounts, setAccounts }) => {
 
   return (
     <div className="space-y-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>{editingId ? "Edit" : "Add"} WordPress Account</CardTitle>
+      <Card className="shadow-sm border-slate-200">
+        <CardHeader className="bg-slate-50 border-b rounded-t-lg">
+          <CardTitle className="flex items-center gap-2">
+            <UserCircle2 className="h-5 w-5 text-purple-600" />
+            {editingId ? "Edit" : "Add"} WordPress Account
+          </CardTitle>
           <CardDescription>
             Manage your WordPress site connections and SEO keywords
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="site-url">Site URL <span className="text-red-500">*</span></Label>
@@ -171,24 +174,27 @@ const AccountsManager = ({ accounts, setAccounts }) => {
             </div>
           </div>
         </CardContent>
-        <CardFooter className="flex justify-between">
+        <CardFooter className="flex justify-between bg-slate-50 border-t rounded-b-lg">
           <Button variant="outline" onClick={resetForm}>
             Cancel
           </Button>
-          <Button onClick={addAccount}>
+          <Button onClick={addAccount} className="bg-purple-600 hover:bg-purple-700">
             {editingId ? "Update" : "Add"} Account
           </Button>
         </CardFooter>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>WordPress Accounts</CardTitle>
+      <Card className="shadow-sm border-slate-200">
+        <CardHeader className="bg-slate-50 border-b">
+          <CardTitle className="flex items-center gap-2">
+            <UserCircle2 className="h-5 w-5 text-purple-600" />
+            WordPress Accounts
+          </CardTitle>
           <CardDescription>
             Your saved WordPress accounts
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           {accounts.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               No accounts yet. Add your first WordPress account above.
@@ -197,7 +203,7 @@ const AccountsManager = ({ accounts, setAccounts }) => {
             <ScrollArea className="h-[300px] rounded-md border">
               <div className="p-4 space-y-4">
                 {accounts.map((account) => (
-                  <div key={account.id} className="rounded-lg border p-4">
+                  <div key={account.id} className="rounded-lg border bg-card p-4 hover:bg-slate-50 transition-colors">
                     <div className="flex justify-between items-start">
                       <div>
                         <h3 className="font-medium">{account.siteUrl}</h3>
@@ -214,6 +220,7 @@ const AccountsManager = ({ accounts, setAccounts }) => {
                           variant="outline"
                           size="icon"
                           onClick={() => editAccount(account)}
+                          className="h-8 w-8"
                         >
                           <Pencil className="h-4 w-4" />
                         </Button>
@@ -221,6 +228,7 @@ const AccountsManager = ({ accounts, setAccounts }) => {
                           variant="outline"
                           size="icon"
                           onClick={() => deleteAccount(account.id)}
+                          className="h-8 w-8 text-red-500 hover:text-red-600"
                         >
                           <Trash className="h-4 w-4" />
                         </Button>

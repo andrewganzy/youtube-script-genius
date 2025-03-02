@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { CalendarClock, Edit, ExternalLink, Filter, Trash } from "lucide-react";
+import { CalendarClock, Edit, ExternalLink, Filter, Trash, FileText } from "lucide-react";
 import { WordPressPost, WordPressAccount } from "@/types/wordpress";
 import { format } from "date-fns";
 import { useToast } from "@/components/ui/use-toast";
@@ -133,16 +133,17 @@ const ExistingPosts = ({ accounts, onEditPost }: ExistingPostsProps) => {
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader>
+    <Card className="w-full shadow-sm border-slate-200">
+      <CardHeader className="bg-slate-50 border-b">
         <CardTitle className="flex items-center gap-2">
+          <FileText className="h-5 w-5 text-purple-600" />
           WordPress Posts
         </CardTitle>
         <CardDescription>
           View and manage existing posts from your WordPress site
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="pt-6">
         <div className="flex flex-col space-y-4">
           <div className="flex flex-col md:flex-row gap-4 items-end">
             <div className="space-y-2 w-full md:w-1/2">
@@ -178,7 +179,7 @@ const ExistingPosts = ({ accounts, onEditPost }: ExistingPostsProps) => {
             <Button 
               onClick={() => fetchPosts()} 
               disabled={loading || !selectedAccount}
-              className="w-full md:w-auto"
+              className="w-full md:w-auto bg-purple-600 hover:bg-purple-700"
             >
               <Filter className="mr-2 h-4 w-4" />
               Refresh Posts
@@ -190,9 +191,9 @@ const ExistingPosts = ({ accounts, onEditPost }: ExistingPostsProps) => {
               <p>Loading posts...</p>
             </div>
           ) : posts.length > 0 ? (
-            <div className="border rounded-md">
+            <div className="border rounded-md mt-4">
               <Table>
-                <TableHeader>
+                <TableHeader className="bg-slate-50">
                   <TableRow>
                     <TableHead>Title</TableHead>
                     <TableHead>Status</TableHead>
@@ -202,7 +203,7 @@ const ExistingPosts = ({ accounts, onEditPost }: ExistingPostsProps) => {
                 </TableHeader>
                 <TableBody>
                   {posts.map((post) => (
-                    <TableRow key={post.id}>
+                    <TableRow key={post.id} className="hover:bg-slate-50">
                       <TableCell className="font-medium">{post.title}</TableCell>
                       <TableCell>
                         {getStatusBadge(post.status)}
@@ -253,7 +254,7 @@ const ExistingPosts = ({ accounts, onEditPost }: ExistingPostsProps) => {
               </Table>
             </div>
           ) : (
-            <div className="border rounded-md p-8 text-center">
+            <div className="border rounded-md p-8 text-center mt-4">
               <p className="text-muted-foreground">No posts found. Select a WordPress account and try again.</p>
             </div>
           )}
