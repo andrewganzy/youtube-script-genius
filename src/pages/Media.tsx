@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Gallery, FolderImage } from "lucide-react";
+import { Images, FileImage } from "lucide-react";
 import MediaManager from "@/components/MediaManager";
 import { WordPressAccount } from "@/types/wordpress";
 
@@ -19,7 +19,7 @@ const Media = ({ accounts = [] }: MediaPageProps) => {
         <div className="text-center space-y-4 w-full">
           <div className="flex items-center justify-center gap-3 mb-2">
             <div className="rounded-full bg-purple-600 p-3 text-white">
-              <FolderImage size={32} />
+              <FileImage size={32} />
             </div>
             <h1 className="text-4xl font-bold tracking-tight">WordPress Media Library</h1>
           </div>
@@ -31,7 +31,7 @@ const Media = ({ accounts = [] }: MediaPageProps) => {
         <Card className="w-full">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Gallery className="text-purple-600" size={24} />
+              <Images className="text-purple-600" size={24} />
               Media Library
             </CardTitle>
             <CardDescription>

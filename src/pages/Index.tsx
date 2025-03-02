@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { AlertCircle, CheckCircle, Youtube, Play, MessageSquare, Calendar, Settings, Image as ImageIcon, FileText, FolderImage } from "lucide-react";
+import { AlertCircle, CheckCircle, Youtube, Play, MessageSquare, Calendar, Settings, Image as ImageIcon, FileText, FileImage } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Link } from "react-router-dom";
 import Editor from "@/components/Editor";
@@ -305,7 +305,7 @@ const Index = () => {
           <div className="flex justify-center mt-4 gap-4">
             <Link to="/media">
               <Button variant="outline" className="gap-2">
-                <FolderImage className="h-4 w-4" />
+                <FileImage className="h-4 w-4" />
                 Media Library
               </Button>
             </Link>
