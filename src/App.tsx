@@ -6,6 +6,7 @@ import Media from "./pages/Media";
 import NotFound from "./pages/NotFound";
 import { Toaster } from "@/components/ui/toaster";
 import { WordPressAccount } from "@/types/wordpress";
+import NavigationBar from "./components/NavigationBar";
 
 function App() {
   const [accounts, setAccounts] = useState<WordPressAccount[]>([]);
@@ -25,6 +26,7 @@ function App() {
 
   return (
     <Router>
+      <NavigationBar />
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/media" element={<Media accounts={accounts} />} />

@@ -14,16 +14,16 @@ const Media = ({ accounts = [] }: MediaPageProps) => {
   const [selectedAccount, setSelectedAccount] = useState("all");
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-7xl">
-      <div className="flex flex-col items-center space-y-8">
-        <div className="text-center space-y-4 w-full">
+    <div className="container mx-auto px-4 py-6 max-w-7xl">
+      <div className="flex flex-col items-center space-y-6">
+        <div className="text-center space-y-2 w-full">
           <div className="flex items-center justify-center gap-3 mb-2">
             <div className="rounded-full bg-purple-600 p-3 text-white">
-              <FileImage size={32} />
+              <FileImage size={28} />
             </div>
-            <h1 className="text-4xl font-bold tracking-tight">WordPress Media Library</h1>
+            <h1 className="text-3xl font-bold tracking-tight">WordPress Media Library</h1>
           </div>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
             Manage your WordPress media files and use them in your content
           </p>
         </div>
