@@ -68,6 +68,7 @@ const MediaManager = ({
   const [media, setMedia] = useState<WordPressMedia[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [accountFilter, setAccountFilter] = useState<string>(selectedAccount);
   const { toast } = useToast();
 
   // Load media from localStorage on component mount
@@ -91,7 +92,7 @@ const MediaManager = ({
 
   // Filter media based on selected account
   const filteredMedia = media.filter(item => 
-    (!selectedAccount || item.accountId === selectedAccount) && 
+    (!accountFilter || item.accountId === accountFilter) && 
     (item.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
      (item.alt && item.alt.toLowerCase().includes(searchTerm.toLowerCase())))
   );
@@ -133,12 +134,12 @@ const MediaManager = ({
       <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
         <div className="w-full md:w-auto">
           <Label htmlFor="account-select">WordPress Account</Label>
-          <Select value={selectedAccount} onValueChange={(value) => {}}>
+          <Select value={accountFilter} onValueChange={(value) => setAccountFilter(value)}>
             <SelectTrigger className="w-full md:w-[250px]">
               <SelectValue placeholder="Select account" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Accounts</SelectItem>
+              <SelectItem value="all">All Accounts</SelectItem>
               {accounts.map(account => (
                 <SelectItem key={account.id} value={account.id}>
                   {account.siteUrl}
@@ -183,7 +184,7 @@ const MediaManager = ({
           <Image className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
           <h3 className="mt-4 text-lg font-medium">No media found</h3>
           <p className="mt-2 text-sm text-muted-foreground">
-            {selectedAccount ? "Try selecting a different account or uploading new media" : "Try uploading some media"}
+            {accountFilter ? "Try selecting a different account or uploading new media" : "Try uploading some media"}
           </p>
         </div>
       ) : (

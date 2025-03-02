@@ -11,7 +11,7 @@ interface MediaPageProps {
 }
 
 const Media = ({ accounts = [] }: MediaPageProps) => {
-  const [selectedAccount, setSelectedAccount] = useState("");
+  const [selectedAccount, setSelectedAccount] = useState("all");
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl">
@@ -49,6 +49,7 @@ const Media = ({ accounts = [] }: MediaPageProps) => {
                 <MediaManager 
                   accounts={accounts} 
                   selectedAccount={selectedAccount}
+                  onSelectImage={(image) => console.log("Selected image:", image)}
                 />
               </TabsContent>
               
@@ -56,6 +57,7 @@ const Media = ({ accounts = [] }: MediaPageProps) => {
                 <MediaManager 
                   accounts={accounts} 
                   selectedAccount={selectedAccount}
+                  onSelectImage={(image) => console.log("Selected image:", image)}
                 />
               </TabsContent>
             </Tabs>
